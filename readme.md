@@ -19,11 +19,35 @@ The default value can  be changed in `xblock-pdf/pdf/ pdf.py`
 
 ## Install / Update the XBlock
 
+Tutor EDX version 17+
+
+Add it to config.yml using this parameter:
+
+nano "$(tutor config printroot)/config.yml
+
+OPENEDX_EXTRA_PIP_REQUIREMENTS
+- git+https://github.com/blazejwiecha/xblock-pdf.git
+
+Save Your new config file
+
+tutor config save
+
+Build Your new openedx image
+
+tutor images build openedx
+
+Start tutor
+
+tutor local start -d
+ 
+==============================================
+
+OPENEDX version:
 Add it to the `EDXAPP_EXTRA_REQUIREMENTS` variable.
 
 ```yml
 EDXAPP_EXTRA_REQUIREMENTS:
-  - name: 'git+https://github.com/IONISx/xblock-pdf.git@v1.0.0#egg=xblock-pdf'
+  - name: 'git+https://github.com/blazejwiecha/xblock-pdf.git@v1.0.0#egg=xblock-pdf'
 ```
 
 Then run your deployment playbooks.
@@ -33,6 +57,8 @@ Then run your deployment playbooks.
 ```shell
 sudo /edx/bin/supervisorctl -c /edx/etc/supervisord.conf restart edxapp:
 ```
+Not needed in tutor EDX 
+
 
 # Use the XBlock
 
