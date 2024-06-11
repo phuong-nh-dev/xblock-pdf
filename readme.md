@@ -1,4 +1,4 @@
-# xblock-pdf
+# xblock-pdf [ENG]
 
 [![Build Status](https://circleci.com/gh/IONISx/xblock-pdf.svg?style=svg)](https://circleci.com/gh/IONISx/xblock-pdf)
 
