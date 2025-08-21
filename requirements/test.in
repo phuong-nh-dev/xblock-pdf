@@ -1,0 +1,8 @@
+# Testing requirements
+-c constraints.txt
+-r base.in
+
+pytest
+pytest-django
+pytest-cov
+mock

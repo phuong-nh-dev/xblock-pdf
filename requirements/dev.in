@@ -1,0 +1,9 @@
+# Development requirements
+-c constraints.txt
+-r base.in
+-r quality.in
+-r test.in
+
+# Development tools
+pip-tools
+tox

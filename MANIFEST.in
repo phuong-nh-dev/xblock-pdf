@@ -1,12 +1,4 @@
-# Include static files and translations
-recursive-include pdf/static *
-recursive-include pdf/locale *
-recursive-include pdf/templates *
-include *.md
-include *.txt
-include *.ini
-include *.js
-include *.json
 include LICENSE
-global-exclude *.pyc
-global-exclude __pycache__
+include readme.md
+include requirements/base.in
+include requirements/constraints.txt

@@ -1,74 +1,97 @@
-"""
-Tests for PDF XBlock
-"""
+""" Unit tests for pdf components """
+# -*- coding: utf-8 -*-
+
+# Imports ###########################################################
+from __future__ import absolute_import
+import json
 import unittest
-from unittest.mock import Mock, patch
 
-from xblock.test.tools import TestRuntime
+from mock import Mock
+from workbench.runtime import WorkbenchRuntime
+from xblock.runtime import DictKeyValueStore, KvsFieldData
 
-from pdf.pdf import PdfBlock
+from pdf import PdfBlock
 
 
+# Constants ###########################################################
+TEST_SUBMIT_DATA = {
+    'display_name': "PDF Document",
+    'url': "http://example.com/test.pdf",
+    'allow_download': True,
+    'source_text': "Download Source",
+    'source_url': "http://example.com/source.ppt"
+}
+
+# Classes ###########################################################
 class TestPdfBlock(unittest.TestCase):
-    """Test PdfBlock functionality"""
+    """ Tests for PdfBlock """
 
-    def setUp(self):
-        """Set up test fixtures"""
-        self.runtime = TestRuntime()
-        self.block = PdfBlock(self.runtime, scope_ids=Mock())
+    @classmethod
+    def make_pdf_block(cls):
+        """ helper to construct a PdfBlock """
+        runtime = WorkbenchRuntime()
+        key_store = DictKeyValueStore()
+        db_model = KvsFieldData(key_store)
+        ids = generate_scope_ids(runtime, 'pdf')
+        return PdfBlock(runtime, db_model, scope_ids=ids)
 
-    def test_init(self):
-        """Test block initialization"""
-        self.assertEqual(self.block.display_name, "PDF")
-        self.assertEqual(self.block.allow_download, True)
-        self.assertEqual(self.block.icon_class, "other")
+    def generate_scope_ids(self, runtime, block_type):
+        """ helper to generate scope IDs """
+        def_id = runtime.id_generator.create_definition(block_type)
+        usage_id = runtime.id_generator.create_usage(def_id)
+        return runtime.id_generator.create_scope(usage_id)
 
-    def test_student_view(self):
-        """Test student view rendering"""
-        self.block.url = "http://example.com/test.pdf"
-        
-        with patch.object(self.block, 'render_template') as mock_render:
-            mock_render.return_value = "<div>PDF Content</div>"
-            
-            fragment = self.block.student_view()
-            
-            self.assertIsNotNone(fragment)
-            mock_render.assert_called_once()
+    def test_pdf_template_content(self):
+        """ Test content of PdfBlock's rendered views """
+        block = TestPdfBlock.make_pdf_block()
+        block.usage_id = Mock()
 
-    def test_studio_view(self):
-        """Test studio view rendering"""
-        with patch.object(self.block, 'render_template') as mock_render:
-            mock_render.return_value = "<div>Studio Content</div>"
-            
-            fragment = self.block.studio_view()
-            
-            self.assertIsNotNone(fragment)
-            mock_render.assert_called_once()
+        student_fragment = block.render('student_view', Mock())
+        # pylint: disable=no-value-for-parameter
+        assert '<div class="pdf-xblock-wrapper"' in student_fragment.content
+        assert 'PDF Document' in student_fragment.content
 
-    def test_save_pdf(self):
-        """Test save_pdf handler"""
-        data = {
-            'display_name': 'Test PDF',
-            'url': 'http://example.com/test.pdf',
-            'allow_download': 'True',
-            'source_text': 'Download Source',
-            'source_url': 'http://example.com/source.ppt'
-        }
-        
-        result = self.block.save_pdf(data)
-        
-        self.assertEqual(result['result'], 'success')
-        self.assertEqual(self.block.display_name, 'Test PDF')
-        self.assertEqual(self.block.url, 'http://example.com/test.pdf')
-        self.assertTrue(self.block.allow_download)
+        studio_fragment = block.render('studio_view', Mock())
+        assert 'wrapper-comp-settings' in studio_fragment.content
+        assert 'validation_alert' in studio_fragment.content
+
+    def test_studio_pdf_submit(self):
+        """ Test studio submission of PdfBlock """
+        block = TestPdfBlock.make_pdf_block()
+
+        body = json.dumps(TEST_SUBMIT_DATA)
+        res = block.handle('studio_submit', make_request(body))
+        # pylint: disable=no-value-for-parameter
+        assert json.loads(res.body.decode('utf8'))['result'] == 'success'
+
+        assert block.display_name == TEST_SUBMIT_DATA['display_name']
+        assert block.url == TEST_SUBMIT_DATA['url']
+        assert block.allow_download == TEST_SUBMIT_DATA['allow_download']
+
+        body = json.dumps('')
+        res = block.handle('studio_submit', make_request(body))
+        assert json.loads(res.body.decode('utf8'))['result'] == 'error'
 
     def test_on_download(self):
-        """Test on_download handler"""
-        with patch.object(self.block.runtime, 'publish') as mock_publish:
-            result = self.block.on_download({})
-            
-            self.assertEqual(result['result'], 'success')
-            mock_publish.assert_called_once()
+        """ Test on_download handler"""
+        block = TestPdfBlock.make_pdf_block()
 
-if __name__ == '__main__':
-    unittest.main()
+        body = json.dumps({})
+        res = block.handle('on_download', make_request(body))
+        # pylint: disable=no-value-for-parameter
+        assert json.loads(res.body.decode('utf8'))['result'] == 'success'
+
+
+def generate_scope_ids(runtime, block_type):
+    """ helper to generate scope IDs """
+    def_id = runtime.id_generator.create_definition(block_type)
+    usage_id = runtime.id_generator.create_usage(def_id)
+    return runtime.id_generator.create_scope(usage_id)
+
+
+def make_request(body, method='POST'):
+    """ helper to make mock request """
+    request = Mock()
+    request.method = method
+    request.body = body.encode('utf-8') if isinstance(body, str) else body
+    return request

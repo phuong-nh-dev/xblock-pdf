@@ -1,173 +1,119 @@
-"""PDF XBlock main Python class - Updated for OpenEDX Teak compatibility"""
+"""PDF XBlock implementation"""
+# -*- coding: utf-8 -*-
 
-import pkg_resources
+# Imports ###########################################################
+from __future__ import absolute_import
 import logging
-
-from django.utils.translation import gettext_lazy as _
 
 from xblock.core import XBlock
 from xblock.fields import Scope, String, Boolean
-from xblock.fragment import Fragment
-from xblockutils.resources import ResourceLoader
-from xblockutils.studio_editable import StudioEditableXBlockMixin
+from web_fragments.fragment import Fragment
+try:
+    from xblock.utils.publish_event import PublishEventMixin  # pylint: disable=ungrouped-imports
+    from xblock.utils.resources import ResourceLoader  # pylint: disable=ungrouped-imports
+except ModuleNotFoundError:  # For backward compatibility with releases older than Quince.
+    from xblockutils.publish_event import PublishEventMixin
+    from xblockutils.resources import ResourceLoader
 
-log = logging.getLogger(__name__)
-loader = ResourceLoader(__name__)
+LOG = logging.getLogger(__name__)
+RESOURCE_LOADER = ResourceLoader(__name__)
 
 
-class PdfBlock(StudioEditableXBlockMixin, XBlock):
+def _(text):
     """
-    PDF XBlock for embedding PDF documents in courses.
-    Compatible with OpenEDX Teak release and XBlock 2.0+.
+    Dummy ugettext.
+    """
+    return text
+
+
+# Classes ###########################################################
+@XBlock.needs("i18n")
+class PdfBlock(XBlock, PublishEventMixin):
+    """
+    XBlock providing a PDF document embed
     """
 
-    """
-    Icon of the XBlock. Values : [other (default), video, problem]
-    """
-    icon_class = "other"
-    
-    # Enable studio editing
-    has_author_view = True
-
-    # Studio editable fields
-    editable_fields = ('display_name', 'url', 'allow_download', 'source_text', 'source_url')
-
-    # Fields
     display_name = String(
         display_name=_("Display Name"),
-        default=_("PDF"),
+        help=_("This name appears in the horizontal navigation at the top of the page."),
         scope=Scope.settings,
-        help=_("This name appears in the horizontal navigation at the top of the page.")
+        default="PDF Document"
     )
-
+    
     url = String(
         display_name=_("PDF URL"),
-        default="http://tutorial.math.lamar.edu/pdf/Trig_Cheat_Sheet.pdf",
-        scope=Scope.content,
-        help=_("The URL for your PDF.")
+        help=_("The URL for your PDF document."),
+        scope=Scope.settings,
+        default="http://tutorial.math.lamar.edu/pdf/Trig_Cheat_Sheet.pdf"
     )
-
-    allow_download = Boolean(
-        display_name=_("PDF Download Allowed"),
-        default=True,
-        scope=Scope.content,
-        help=_("Display a download button for this PDF.")
-    )
-
-    source_text = String(
-        display_name=_("Source document button text"),
-        default="",
-        scope=Scope.content,
-        help=_("Add a download link for the source file of your PDF. "
-               "Use it for example to provide the PowerPoint file used to create this PDF.")
-    )
-
-    source_url = String(
-        display_name=_("Source document URL"),
-        default="",
-        scope=Scope.content,
-        help=_("Add a download link for the source file of your PDF. "
-               "Use it for example to provide the PowerPoint file used to create this PDF.")
-    )
-
-    # XBlock 2.0+ compatibility
-    @property
-    def block_id(self):
-        """Return block ID for XBlock 2.0+ compatibility"""
-        return getattr(self.scope_ids, 'usage_id', None)
     
-    @property
-    def block_type(self):
-        """Return block type for XBlock 2.0+ compatibility"""
-        return 'pdf'
+    allow_download = Boolean(
+        display_name=_("Allow Download"),
+        help=_("Display a download button for this PDF."),
+        scope=Scope.settings,
+        default=True
+    )
+    
+    source_text = String(
+        display_name=_("Source Document Button Text"),
+        help=_("Add a download link for the source file of your PDF. "
+               "Use it for example to provide the PowerPoint file used to create this PDF."),
+        scope=Scope.settings,
+        default=""
+    )
+    
+    source_url = String(
+        display_name=_("Source Document URL"),
+        help=_("Add a download link for the source file of your PDF. "
+               "Use it for example to provide the PowerPoint file used to create this PDF."),
+        scope=Scope.settings,
+        default=""
+    )
 
-    # Util functions
-    def load_resource(self, resource_path):
-        """
-        Gets the content of a resource using modern XBlock utils
-        """
-        try:
-            return loader.load_unicode(resource_path)
-        except Exception as e:
-            log.warning("Failed to load resource %s: %s", resource_path, e)
-            # Fallback to pkg_resources for compatibility
-            try:
-                resource_content = pkg_resources.resource_string(__name__, resource_path)
-                return resource_content.decode("utf8")
-            except Exception as fallback_e:
-                log.error("Fallback resource loading failed for %s: %s", resource_path, fallback_e)
-                return ""
 
-    def render_template(self, template_path, context=None):
-        """
-        Evaluate a template by resource path, applying the provided context
-        """
-        if context is None:
-            context = {}
-        try:
-            return loader.render_django_template(template_path, context)
-        except Exception as e:
-            log.warning("Failed to render template %s: %s", template_path, e)
-            # Fallback to simple template loading
-            template_str = self.load_resource(template_path)
-            # Simple template variable substitution for fallback
-            for key, value in context.items():
-                template_str = template_str.replace('{{ ' + key + ' }}', str(value))
-            return template_str
 
-    # Main functions
-    def student_view(self, context=None):
+    # Context argument is specified for xblocks, but we are not using herein
+    def student_view(self, context):  # pylint: disable=unused-argument
         """
-        The primary view of the XBlock, shown to students
-        when viewing courses.
+        Player view, displayed to the student
         """
+        fragment = Fragment()
 
-        context = {
-            'display_name': self.display_name,
-            'url': self.url,
-            'allow_download': self.allow_download,
-            'source_text': self.source_text,
-            'source_url': self.source_url
-        }
-        html = self.render_template('static/html/pdf_view.html', context)
-        
-        # Log the PDF loading event
-        try:
-            event_type = 'edx.pdf.loaded'
-            event_data = {
-                'url': self.url,
-                'source_url': self.source_url,
-            }
-            self.runtime.publish(self, event_type, event_data)
-        except Exception as e:
-            log.warning("Failed to publish PDF loaded event: %s", e)
+        fragment.add_content(RESOURCE_LOADER.render_django_template(
+            "/templates/html/pdf_view.html",
+            context={"self": self},
+            i18n_service=self.runtime.service(self, 'i18n'),
+        ))
+        fragment.add_css(RESOURCE_LOADER.load_unicode('public/css/pdf.css'))
+        fragment.add_javascript(RESOURCE_LOADER.load_unicode('public/js/pdf_view.js'))
 
-        frag = Fragment(html)
-        frag.add_javascript(self.load_resource("static/js/pdf_view.js"))
-        frag.initialize_js('pdfXBlockInitView')
-        return frag
+        fragment.initialize_js('PdfBlock')
 
-    def studio_view(self, context=None):
+        return fragment
+
+    # Context argument is specified for xblocks, but we are not using herein
+    def studio_view(self, context):  # pylint: disable=unused-argument
         """
-        The secondary view of the XBlock, shown to teachers
-        when editing the XBlock.
+        Editing view in Studio
         """
-        context = {
-            'display_name': self.display_name,
-            'url': self.url,
-            'allow_download': self.allow_download,
-            'source_text': self.source_text,
-            'source_url': self.source_url
-        }
-        html = self.render_template('static/html/pdf_edit.html', context)
+        fragment = Fragment()
+        # Need to access protected members of fields to get their default value
+        default_name = self.fields['display_name']._default  # pylint: disable=protected-access,unsubscriptable-object
+        fragment.add_content(RESOURCE_LOADER.render_django_template(
+            "/templates/html/pdf_edit.html",
+            context={'self': self, 'defaultName': default_name},
+            i18n_service=self.runtime.service(self, 'i18n'),
+        ))
+        fragment.add_javascript(RESOURCE_LOADER.load_unicode('public/js/pdf_edit.js'))
+        fragment.add_css(RESOURCE_LOADER.load_unicode('public/css/pdf_edit.css'))
 
-        frag = Fragment(html)
-        frag.add_javascript(self.load_resource("static/js/pdf_edit.js"))
-        frag.initialize_js('pdfXBlockInitEdit')
-        return frag
+        fragment.initialize_js('PdfEditBlock')
 
+        return fragment
+
+    # suffix argument is specified for xblocks, but we are not using herein
     @XBlock.json_handler
-    def on_download(self, data, suffix=''):
+    def on_download(self, data, suffix=''):  # pylint: disable=unused-argument
         """
         The download file event handler
         """
@@ -179,23 +125,40 @@ class PdfBlock(StudioEditableXBlockMixin, XBlock):
             }
             self.runtime.publish(self, event_type, event_data)
             return {'result': 'success'}
-        except Exception as e:
-            log.warning("Failed to publish PDF downloaded event: %s", e)
-            return {'result': 'error', 'message': str(e)}
+        except Exception as ex:
+            LOG.warning("Failed to publish PDF downloaded event: %s", ex)
+            return {'result': 'error', 'message': str(ex)}
 
+    # suffix argument is specified for xblocks, but we are not using herein
     @XBlock.json_handler
-    def save_pdf(self, data, suffix=''):
+    def studio_submit(self, submissions, suffix=''):  # pylint: disable=unused-argument
         """
-        The saving handler.
+        Change the settings for this XBlock given by the Studio user
         """
-        try:
-            self.display_name = data.get('display_name', self.display_name)
-            self.url = data.get('url', self.url)
-            self.allow_download = data.get('allow_download', 'True') == "True"  # Str to Bool translation
-            self.source_text = data.get('source_text', self.source_text)
-            self.source_url = data.get('source_url', self.source_url)
+        if not isinstance(submissions, dict):
+            LOG.error("submissions object from Studio is not a dict - %r", submissions)
+            return {
+                'result': 'error'
+            }
 
-            return {'result': 'success'}
-        except Exception as e:
-            log.error("Failed to save PDF settings: %s", e)
-            return {'result': 'error', 'message': str(e)}
+        if 'display_name' in submissions:
+            self.display_name = submissions['display_name']
+        if 'url' in submissions:
+            self.url = submissions['url']
+        if 'allow_download' in submissions:
+            self.allow_download = submissions['allow_download']
+        if 'source_text' in submissions:
+            self.source_text = submissions['source_text']
+        if 'source_url' in submissions:
+            self.source_url = submissions['source_url']
+
+        return {
+            'result': 'success',
+        }
+
+    @staticmethod
+    def workbench_scenarios():
+        """
+        A canned scenario for display in the workbench.
+        """
+        return [("PDF scenario", "<vertical_demo><pdf/></vertical_demo>")]

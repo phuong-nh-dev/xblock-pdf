@@ -1,0 +1,14 @@
+# Constraints for PDF XBlock
+# Keep this file in sync with openedx/edx-platform constraints when possible
+
+# XBlock Framework
+XBlock>=1.6.0
+web-fragments>=1.0.0
+
+# Django
+Django>=4.2,<5.3
+
+# Development and testing
+pytest>=7.0.0
+pytest-django>=4.5.0
+pytest-cov>=4.0.0

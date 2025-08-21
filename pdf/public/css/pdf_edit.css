@@ -1,0 +1,65 @@
+/* CSS for PdfBlock editing */
+.pdf-edit-wrapper {
+    padding: 20px;
+}
+
+.pdf-edit-field {
+    margin-bottom: 20px;
+}
+
+.pdf-edit-field label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.pdf-edit-field input,
+.pdf-edit-field textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.pdf-edit-field textarea {
+    min-height: 60px;
+    resize: vertical;
+}
+
+.pdf-edit-field input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+}
+
+.pdf-edit-field .help-text {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+.pdf-edit-buttons {
+    margin-top: 30px;
+    text-align: right;
+}
+
+.pdf-edit-buttons button {
+    margin-left: 10px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.pdf-save-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.pdf-cancel-btn {
+    background-color: #6c757d;
+    color: white;
+}

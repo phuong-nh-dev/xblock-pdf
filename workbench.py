@@ -1,32 +1,24 @@
-#!/usr/bin/env python
 """
-Workbench configuration for xblock-pdf development and testing
+Workbench settings for PDF XBlock.
 """
 
-from workbench import scenarios
+from xblock.reference.plugins import Service, default_services
+from workbench import settings_base
 
-# Workbench configuration
-def make_workbench():
-    """Create workbench for PDF XBlock"""
-    return scenarios.SCENARIOS.get('pdf.pdf.PdfBlock', [
-        ("PDF XBlock Demo", """
-            <pdf url="http://tutorial.math.lamar.edu/pdf/Trig_Cheat_Sheet.pdf" 
-                 display_name="Sample PDF Document"
-                 allow_download="true"
-                 source_text="Download PowerPoint"
-                 source_url="http://tutorial.math.lamar.edu/pdf/Trig_Cheat_Sheet.ppt" />
-        """),
-        ("PDF XBlock Minimal", """
-            <pdf url="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" 
-                 display_name="Simple PDF" />
-        """),
-    ])
+# Use the workbench settings as our base
+globals().update(settings_base.__dict__)
 
-if __name__ == '__main__':
-    # For standalone testing
-    from xblock.django.request import django_to_webob_request
-    from xblock.runtime import Runtime
-    
-    print("PDF XBlock workbench scenarios available")
-    for name, xml in make_workbench():
-        print(f"- {name}")
+# Add our XBlock
+INSTALLED_APPS.extend([
+    'pdf',
+])
+
+# Configure XBlock
+XBLOCK_SELECT_FUNCTION = lambda block_type: (
+    block_type in ['pdf']
+)
+
+# XBlock configuration
+XBLOCKS = {
+    'pdf': 'pdf.pdf:PdfBlock',
+}

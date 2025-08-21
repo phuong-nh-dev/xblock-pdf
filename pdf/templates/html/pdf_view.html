@@ -1,0 +1,21 @@
+<div class="pdf-xblock-wrapper" data-display-name="{{self.display_name}}" data-url="{{self.url}}">
+    <input type="hidden" class="load_event_complete">
+    
+    {% if self.display_name %}
+    <div class="pdf-title">{{ self.display_name }}</div>
+    {% endif %}
+    
+    <iframe src="{{ self.url }}" class="pdf-embed" frameborder="0" title="{{ self.display_name }}"></iframe>
+    
+    {% if self.allow_download or self.source_text %}
+    <div class="pdf-controls">
+        {% if self.allow_download %}
+        <a href="{{ self.url }}" target="_blank" class="pdf-download-btn" onclick="pdfDownloadEvent();">Download PDF</a>
+        {% endif %}
+        
+        {% if self.source_text and self.source_url %}
+        <a href="{{ self.source_url }}" target="_blank" class="pdf-source-btn">{{ self.source_text }}</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
