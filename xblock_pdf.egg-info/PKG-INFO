@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: xblock-pdf
+Version: 1.0.0
+Summary: Course component (Open edX XBlock) that provides an easy way to embed a PDF
+License-File: LICENSE
+Requires-Dist: XBlock
+Dynamic: license-file
+Dynamic: requires-dist
+Dynamic: summary

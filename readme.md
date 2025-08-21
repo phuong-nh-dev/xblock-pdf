@@ -1,8 +1,8 @@
-# xblock-pdf [ENG]
+# xblock-pdf v2.0 - OpenEDX Teak Compatible
 
 [![Build Status](https://circleci.com/gh/IONISx/xblock-pdf.svg?style=svg)](https://circleci.com/gh/IONISx/xblock-pdf)
 
-> Course component (Open edX XBlock) that provides an easy way to embed a PDF
+> Course component (Open edX XBlock) that provides an easy way to embed a PDF - **Updated for OpenEDX Teak Release Compatibility**
 
 ## Features
 
@@ -17,37 +17,46 @@
 By default, PDF Download Allowed is set to `True`.
 The default value can  be changed in `xblock-pdf/pdf/ pdf.py`
 
+## What's New in v2.0
+
+- ✅ **OpenEDX Teak Release Compatible**
+- ✅ **Modern Python 3.8+ Support**
+- ✅ **Updated XBlock Dependencies**
+- ✅ **Improved Error Handling**
+- ✅ **Modern Development Tools**
+- ✅ **Better Template Rendering**
+- ✅ **Enhanced Studio Integration**
+
 ## Install / Update the XBlock
 
-Tutor EDX version 17+
+### For Tutor EDX (Recommended)
 
 Add it to config.yml using this parameter:
 
-nano "$(tutor config printroot)/config.yml
+```bash
+nano "$(tutor config printroot)/config.yml"
+```
 
-OPENEDX_EXTRA_PIP_REQUIREMENTS
-- git+https://github.com/blazejwiecha/xblock-pdf.git
+```yml
+OPENEDX_EXTRA_PIP_REQUIREMENTS:
+  - "git+https://github.com/your-repo/xblock-pdf.git@v2.0.0#egg=xblock-pdf"
+```
 
-Save Your new config file
+Save your config file and rebuild:
 
+```bash
 tutor config save
-
-Build Your new openedx image
-
 tutor images build openedx
-
-Start tutor
-
 tutor local start -d
- 
-==============================================
+```
 
-OPENEDX version:
-Add it to the `EDXAPP_EXTRA_REQUIREMENTS` variable.
+### For Native OpenEDX Installation
+
+Add it to the `EDXAPP_EXTRA_REQUIREMENTS` variable:
 
 ```yml
 EDXAPP_EXTRA_REQUIREMENTS:
-  - name: 'git+https://github.com/blazejwiecha/xblock-pdf.git@v1.0.0#egg=xblock-pdf'
+  - name: 'git+https://github.com/your-repo/xblock-pdf.git@v2.0.0#egg=xblock-pdf'
 ```
 
 Then run your deployment playbooks.
@@ -70,21 +79,49 @@ Go to `Settings -> Advanced Settings` and set `advanced_modules` to `["pdf"]`.
 
 Select `Advanced -> PDF` in your unit.
 
-## Development environment
+## Development Environment
 
-For the code quality environment, you need to install both Python and JavaScript requirements.
+### Prerequisites
 
-Run the following:
+- Python 3.8+
+- Node.js 16+
+- npm 8+
 
-    npm install -g grunt-cli
-    npm install
+### Setup
 
-Then, preferably in a [virtualenv](https://virtualenv.pypa.io), run
+1. **Install JavaScript dependencies:**
+   ```bash
+   npm install -g grunt-cli
+   npm install
+   ```
 
-    pip install -r requirements.txt
+2. **Install Python dependencies (preferably in a virtualenv):**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
 
+### Development Commands
 
-Then, run `grunt test` to assess code quality.
+- **Run tests:** `npm test` or `grunt test`
+- **Build assets:** `npm run build` or `grunt build`
+- **Lint code:** `npm run lint`
+- **Format code:** `npm run format`
+- **Watch for changes:** `grunt dev`
+
+### Python Testing
+
+```bash
+# Run Python tests
+pytest
+
+# Run with coverage
+pytest --cov=pdf
+
+# Run tox for multiple Python versions
+tox
+```
 
 ## License
 

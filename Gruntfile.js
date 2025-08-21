@@ -3,21 +3,18 @@ module.exports = function (grunt) {
     require('load-grunt-tasks')(grunt);
 
     grunt.initConfig({
-        jscs: {
-            all: {
-                files: {
-                    src: [
-                        'Gruntfile.js',
-                        'pdf/static/js/**/*.js'
-                    ]
-                }
-            }
+        eslint: {
+            options: {
+                configFile: '.eslintrc.js'
+            },
+            target: [
+                'Gruntfile.js',
+                'pdf/static/js/**/*.js'
+            ]
         },
 
-        // ## //
-
         jshint: {
-            options : {
+            options: {
                 jshintrc: true
             },
             all: {
@@ -30,29 +27,31 @@ module.exports = function (grunt) {
             }
         },
 
-        // ## //
+        uglify: {
+            options: {
+                mangle: false,
+                compress: {
+                    drop_console: true
+                }
+            },
+            build: {
+                files: {
+                    'pdf/static/js/pdf_view.min.js': ['pdf/static/js/pdf_view.js'],
+                    'pdf/static/js/pdf_edit.min.js': ['pdf/static/js/pdf_edit.js']
+                }
+            }
+        },
 
-        flake8: {
-            all: {
-                options: {
-                    maxLineLength: 120,
-                    hangClosing: false
-                },
-                src: [
-                    'setup.py',
-                    'pdf/**/*.py'
-                ]
+        watch: {
+            js: {
+                files: ['pdf/static/js/**/*.js', '!pdf/static/js/**/*.min.js'],
+                tasks: ['jshint', 'uglify']
             }
         }
     });
 
-    grunt.registerTask('default', [
-        'test'
-    ]);
-
-    grunt.registerTask('test', [
-        'jscs:all',
-        'jshint:all',
-        'flake8:all'
-    ]);
+    grunt.registerTask('default', ['test']);
+    grunt.registerTask('test', ['jshint:all', 'eslint']);
+    grunt.registerTask('build', ['jshint:all', 'eslint', 'uglify']);
+    grunt.registerTask('dev', ['build', 'watch']);
 };

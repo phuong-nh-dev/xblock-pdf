@@ -1,0 +1,47 @@
+# PDF XBlock English translations
+# Copyright (C) 2024 PDF XBlock contributors
+# This file is distributed under the same license as the xblock-pdf package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: xblock-pdf 2.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-12-19 12:00+0000\n"
+"PO-Revision-Date: 2024-12-19 12:00+0000\n"
+"Last-Translator: PDF XBlock Team\n"
+"Language: en\n"
+"Language-Team: English\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Display Name"
+msgstr "Display Name"
+
+msgid "PDF"
+msgstr "PDF"
+
+msgid "This name appears in the horizontal navigation at the top of the page."
+msgstr "This name appears in the horizontal navigation at the top of the page."
+
+msgid "PDF URL"
+msgstr "PDF URL"
+
+msgid "The URL for your PDF."
+msgstr "The URL for your PDF."
+
+msgid "PDF Download Allowed"
+msgstr "PDF Download Allowed"
+
+msgid "Display a download button for this PDF."
+msgstr "Display a download button for this PDF."
+
+msgid "Source document button text"
+msgstr "Source document button text"
+
+msgid "Add a download link for the source file of your PDF. Use it for example to provide the PowerPoint file used to create this PDF."
+msgstr "Add a download link for the source file of your PDF. Use it for example to provide the PowerPoint file used to create this PDF."
+
+msgid "Source document URL"
+msgstr "Source document URL"
