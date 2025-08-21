@@ -15,7 +15,7 @@
 ## Customize the XBlock
 
 By default, PDF Download Allowed is set to `True`.
-The default value can  be changed in `xblock-pdf/pdf/ pdf.py`
+The default value can be changed in `xblock-pdf/pdf/ pdf.py`
 
 ## What's New in v2.0
 
@@ -56,7 +56,7 @@ Add it to the `EDXAPP_EXTRA_REQUIREMENTS` variable:
 
 ```yml
 EDXAPP_EXTRA_REQUIREMENTS:
-  - name: 'git+https://github.com/your-repo/xblock-pdf.git@v2.0.0#egg=xblock-pdf'
+  - name: "git+https://github.com/your-repo/xblock-pdf.git@v2.0.0#egg=xblock-pdf"
 ```
 
 Then run your deployment playbooks.
@@ -66,8 +66,8 @@ Then run your deployment playbooks.
 ```shell
 sudo /edx/bin/supervisorctl -c /edx/etc/supervisord.conf restart edxapp:
 ```
-Not needed in tutor EDX 
 
+Not needed in tutor EDX
 
 # Use the XBlock
 
@@ -90,6 +90,7 @@ Select `Advanced -> PDF` in your unit.
 ### Setup
 
 1. **Install JavaScript dependencies:**
+
    ```bash
    npm install -g grunt-cli
    npm install
@@ -104,24 +105,11 @@ Select `Advanced -> PDF` in your unit.
 
 ### Development Commands
 
-- **Run tests:** `npm test` or `grunt test`
+- **Run linting:** `grunt test`
 - **Build assets:** `npm run build` or `grunt build`
 - **Lint code:** `npm run lint`
 - **Format code:** `npm run format`
 - **Watch for changes:** `grunt dev`
-
-### Python Testing
-
-```bash
-# Run Python tests
-pytest
-
-# Run with coverage
-pytest --cov=pdf
-
-# Run tox for multiple Python versions
-tox
-```
 
 ## License
 

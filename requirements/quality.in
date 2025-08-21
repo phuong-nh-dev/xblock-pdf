@@ -1,6 +1,5 @@
 # Quality assurance requirements
 -c constraints.txt
--r test.in
 
 pylint
 pycodestyle
