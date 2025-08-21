@@ -47,28 +47,7 @@ class PdfBlock(XBlock, PublishEventMixin):
         default="http://tutorial.math.lamar.edu/pdf/Trig_Cheat_Sheet.pdf"
     )
     
-    allow_download = Boolean(
-        display_name=_("Allow Download"),
-        help=_("Display a download button for this PDF."),
-        scope=Scope.settings,
-        default=True
-    )
-    
-    source_text = String(
-        display_name=_("Source Document Button Text"),
-        help=_("Add a download link for the source file of your PDF. "
-               "Use it for example to provide the PowerPoint file used to create this PDF."),
-        scope=Scope.settings,
-        default=""
-    )
-    
-    source_url = String(
-        display_name=_("Source Document URL"),
-        help=_("Add a download link for the source file of your PDF. "
-               "Use it for example to provide the PowerPoint file used to create this PDF."),
-        scope=Scope.settings,
-        default=""
-    )
+
 
 
 
@@ -111,23 +90,7 @@ class PdfBlock(XBlock, PublishEventMixin):
 
         return fragment
 
-    # suffix argument is specified for xblocks, but we are not using herein
-    @XBlock.json_handler
-    def on_download(self, data, suffix=''):  # pylint: disable=unused-argument
-        """
-        The download file event handler
-        """
-        try:
-            event_type = 'edx.pdf.downloaded'
-            event_data = {
-                'url': self.url,
-                'source_url': self.source_url,
-            }
-            self.runtime.publish(self, event_type, event_data)
-            return {'result': 'success'}
-        except Exception as ex:
-            LOG.warning("Failed to publish PDF downloaded event: %s", ex)
-            return {'result': 'error', 'message': str(ex)}
+
 
     # suffix argument is specified for xblocks, but we are not using herein
     @XBlock.json_handler
@@ -145,12 +108,6 @@ class PdfBlock(XBlock, PublishEventMixin):
             self.display_name = submissions['display_name']
         if 'url' in submissions:
             self.url = submissions['url']
-        if 'allow_download' in submissions:
-            self.allow_download = submissions['allow_download']
-        if 'source_text' in submissions:
-            self.source_text = submissions['source_text']
-        if 'source_url' in submissions:
-            self.source_url = submissions['source_url']
 
         return {
             'result': 'success',
